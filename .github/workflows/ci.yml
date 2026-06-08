@@ -1,0 +1,16 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      # The generated GraphQL types (app/generated/graphql.ts) are committed, so
+      # the gate runs without the sibling API repo. Run `npm run codegen` locally
+      # after changing a .graphql op.
+      - run: npm run check

@@ -1,0 +1,15 @@
+query Activities {
+  activities {
+    id
+    title
+    slug
+    startsAt
+    maxAttendees
+    attendanceCount
+    viewerIsRegistered
+    creator {
+      id
+      name
+    }
+  }
+}

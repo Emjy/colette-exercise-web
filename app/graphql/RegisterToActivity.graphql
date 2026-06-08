@@ -1,0 +1,7 @@
+mutation RegisterToActivity($activityId: ID!) {
+  registerToActivity(input: { activityId: $activityId }) {
+    attendance {
+      id
+    }
+  }
+}

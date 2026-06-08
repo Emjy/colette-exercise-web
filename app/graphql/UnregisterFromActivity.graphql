@@ -1,0 +1,7 @@
+mutation UnregisterFromActivity($activityId: ID!) {
+  unregisterFromActivity(input: { activityId: $activityId }) {
+    attendance {
+      id
+    }
+  }
+}
