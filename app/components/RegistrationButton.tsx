@@ -8,7 +8,7 @@ type ActionResult =
 type RegistrationButtonProps = {
   activityId: string;
   isRegistered: boolean;
-  viewerIsOnWaitingList: boolean;
+  viewerIsOnWaitingList?: boolean;
   full?: boolean;
 };
 
@@ -27,7 +27,7 @@ type RegistrationButtonProps = {
 export function RegistrationButton({
   activityId,
   isRegistered,
-  viewerIsOnWaitingList,
+  viewerIsOnWaitingList = false,
   full = false,
 }: RegistrationButtonProps) {
   const fetcher = useFetcher<ActionResult>();
@@ -45,7 +45,11 @@ export function RegistrationButton({
   }
 
   const canJoinWaitingList = full && !isRegistered && !viewerIsOnWaitingList;
-  const intent = isRegistered ? "unregister" : canJoinWaitingList ? "join-waiting-list" : "register";
+  const intent = isRegistered
+    ? "unregister"
+    : canJoinWaitingList
+      ? "join-waiting-list"
+      : "register";
 
   const label = submitting
     ? isRegistered

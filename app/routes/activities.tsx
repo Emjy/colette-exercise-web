@@ -66,6 +66,7 @@ export default function Activities({ loaderData }: Route.ComponentProps) {
                     <RegistrationButton
                       activityId={activity.id}
                       isRegistered={activity.viewerIsRegistered}
+                      viewerIsOnWaitingList={activity.viewerIsOnWaitingList}
                       full={activity.attendanceCount >= activity.maxAttendees}
                     />
                     <Link

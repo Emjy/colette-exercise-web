@@ -39,6 +39,8 @@ export type Activity = {
   slug: Scalars['String']['output'];
   startsAt: Scalars['DateTime']['output'];
   title: Scalars['String']['output'];
+  /** Whether the current viewer has an active waiting list entry. False when not signed in. */
+  viewerIsOnWaitingList: Scalars['Boolean']['output'];
   /** Whether the current viewer has an active registration. False when not signed in. */
   viewerIsRegistered: Scalars['Boolean']['output'];
 };
@@ -47,6 +49,20 @@ export type ActivityAttendance = {
   __typename?: 'ActivityAttendance';
   activity: Activity;
   id: Scalars['ID']['output'];
+};
+
+export type ActivityWaitingListEntry = {
+  __typename?: 'ActivityWaitingListEntry';
+  id: Scalars['ID']['output'];
+};
+
+export type JoinWaitingListInput = {
+  activityId: Scalars['ID']['input'];
+};
+
+export type JoinWaitingListPayload = {
+  __typename?: 'JoinWaitingListPayload';
+  waitingListEntry?: Maybe<ActivityWaitingListEntry>;
 };
 
 export type RegisterToActivityInput = {
@@ -60,10 +76,17 @@ export type RegisterToActivityPayload = {
 
 export type RootMutationType = {
   __typename?: 'RootMutationType';
+  /** Add the current member to the waiting list of a full activity. */
+  joinWaitingList?: Maybe<JoinWaitingListPayload>;
   /** Register the current member to an activity. */
   registerToActivity?: Maybe<RegisterToActivityPayload>;
   /** Unregister the current member from an activity (frees a seat). */
   unregisterFromActivity?: Maybe<RegisterToActivityPayload>;
+};
+
+
+export type RootMutationTypeJoinWaitingListArgs = {
+  input: JoinWaitingListInput;
 };
 
 
@@ -98,14 +121,21 @@ export type User = {
 export type ActivitiesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ActivitiesQuery = { __typename?: 'RootQueryType', activities: Array<{ __typename?: 'Activity', id: string, title: string, slug: string, startsAt: string, maxAttendees: number, attendanceCount: number, viewerIsRegistered: boolean, creator?: { __typename?: 'User', id: string, name: string } | null }> };
+export type ActivitiesQuery = { __typename?: 'RootQueryType', activities: Array<{ __typename?: 'Activity', id: string, title: string, slug: string, startsAt: string, maxAttendees: number, attendanceCount: number, viewerIsRegistered: boolean, viewerIsOnWaitingList: boolean, creator?: { __typename?: 'User', id: string, name: string } | null }> };
 
 export type ActivityQueryVariables = Exact<{
   slug: Scalars['String']['input'];
 }>;
 
 
-export type ActivityQuery = { __typename?: 'RootQueryType', activity?: { __typename?: 'Activity', id: string, title: string, slug: string, description?: string | null, startsAt: string, maxAttendees: number, attendanceCount: number, viewerIsRegistered: boolean, creator?: { __typename?: 'User', id: string, name: string } | null, participants: Array<{ __typename?: 'User', id: string, name: string }> } | null };
+export type ActivityQuery = { __typename?: 'RootQueryType', activity?: { __typename?: 'Activity', id: string, title: string, slug: string, description?: string | null, startsAt: string, maxAttendees: number, attendanceCount: number, viewerIsRegistered: boolean, viewerIsOnWaitingList: boolean, creator?: { __typename?: 'User', id: string, name: string } | null, participants: Array<{ __typename?: 'User', id: string, name: string }> } | null };
+
+export type JoinWaitingListMutationVariables = Exact<{
+  activityId: Scalars['ID']['input'];
+}>;
+
+
+export type JoinWaitingListMutation = { __typename?: 'RootMutationType', joinWaitingList?: { __typename?: 'JoinWaitingListPayload', waitingListEntry?: { __typename?: 'ActivityWaitingListEntry', id: string } | null } | null };
 
 export type RegisterToActivityMutationVariables = Exact<{
   activityId: Scalars['ID']['input'];
@@ -132,6 +162,7 @@ export const ActivitiesDocument = gql`
     maxAttendees
     attendanceCount
     viewerIsRegistered
+    viewerIsOnWaitingList
     creator {
       id
       name
@@ -150,6 +181,7 @@ export const ActivityDocument = gql`
     maxAttendees
     attendanceCount
     viewerIsRegistered
+    viewerIsOnWaitingList
     creator {
       id
       name
@@ -157,6 +189,15 @@ export const ActivityDocument = gql`
     participants {
       id
       name
+    }
+  }
+}
+    `;
+export const JoinWaitingListDocument = gql`
+    mutation JoinWaitingList($activityId: ID!) {
+  joinWaitingList(input: {activityId: $activityId}) {
+    waitingListEntry {
+      id
     }
   }
 }
@@ -192,6 +233,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     Activity(variables: ActivityQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<ActivityQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<ActivityQuery>({ document: ActivityDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Activity', 'query', variables);
+    },
+    JoinWaitingList(variables: JoinWaitingListMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<JoinWaitingListMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<JoinWaitingListMutation>({ document: JoinWaitingListDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'JoinWaitingList', 'mutation', variables);
     },
     RegisterToActivity(variables: RegisterToActivityMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<RegisterToActivityMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<RegisterToActivityMutation>({ document: RegisterToActivityDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'RegisterToActivity', 'mutation', variables);

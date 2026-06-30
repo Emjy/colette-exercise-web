@@ -3,7 +3,11 @@ import { createRoutesStub } from "react-router";
 import { expect, test } from "vitest";
 import { RegistrationButton } from "./RegistrationButton";
 
-function renderButton(props: { isRegistered: boolean; full?: boolean }) {
+function renderButton(props: {
+  isRegistered: boolean;
+  viewerIsOnWaitingList?: boolean;
+  full?: boolean;
+}) {
   const Stub = createRoutesStub([
     {
       path: "/",
@@ -25,13 +29,19 @@ test("shows 'Deregister' when the viewer is registered", () => {
   expect(screen.getByRole("button").textContent).toBe("Deregister");
 });
 
-test("disables Register and explains why when the activity is full", () => {
-  renderButton({ isRegistered: false, full: true });
+test("shows 'Join waiting list' and keeps the button active when the activity is full", () => {
+  renderButton({ isRegistered: false, viewerIsOnWaitingList: false, full: true });
 
   const button = screen.getByRole("button");
-  expect(button.textContent).toBe("Register");
-  expect(button.hasAttribute("disabled")).toBe(true);
-  expect(screen.getByText(/full/i)).toBeTruthy();
+  expect(button.textContent).toBe("Join waiting list");
+  expect(button.hasAttribute("disabled")).toBe(false);
+});
+
+test("shows a status message with no button when the viewer is already on the waiting list", () => {
+  renderButton({ isRegistered: false, viewerIsOnWaitingList: true, full: true });
+
+  expect(screen.queryByRole("button")).toBeNull();
+  expect(screen.getByRole("status").textContent).toContain("waiting list");
 });
 
 test("still lets a registered member deregister from a full activity", () => {
