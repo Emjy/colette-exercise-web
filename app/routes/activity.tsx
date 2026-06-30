@@ -52,7 +52,7 @@ export default function Activity({ loaderData }: Route.ComponentProps) {
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-clay">
             <time dateTime={activity.startsAt}>
-              {startDate.toLocaleString(undefined, DATE_FORMAT)}
+              {startDate.toLocaleString("fr-FR", DATE_FORMAT)}
             </time>
           </p>
           {activity.viewerIsRegistered ? (
