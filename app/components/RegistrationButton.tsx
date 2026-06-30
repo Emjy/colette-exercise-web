@@ -51,17 +51,13 @@ export function RegistrationButton({
       ? "join-waiting-list"
       : "register";
 
-  const label = submitting
-    ? isRegistered
-      ? "Deregistering…"
-      : canJoinWaitingList
-        ? "Joining waiting list…"
-        : "Registering…"
-    : isRegistered
-      ? "Deregister"
-      : canJoinWaitingList
-        ? "Join waiting list"
-        : "Register";
+  const LABELS = {
+    register: ["Register", "Registering…"],
+    unregister: ["Deregister", "Deregistering…"],
+    "join-waiting-list": ["Join waiting list", "Joining waiting list…"],
+  } as const;
+  const [idleLabel, busyLabel] = LABELS[intent];
+  const label = submitting ? busyLabel : idleLabel;
 
   return (
     <div>

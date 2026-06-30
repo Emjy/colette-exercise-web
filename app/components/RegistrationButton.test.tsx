@@ -12,7 +12,14 @@ function renderButton(props: {
     {
       path: "/",
       Component: () => <RegistrationButton activityId="a1" {...props} />,
-      action: () => ({ ok: true, intent: props.isRegistered ? "unregister" : "register" }),
+      action: () => ({
+        ok: true,
+        intent: props.isRegistered
+          ? "unregister"
+          : props.full && !props.viewerIsOnWaitingList
+            ? "join-waiting-list"
+            : "register",
+      }),
     },
   ]);
 
