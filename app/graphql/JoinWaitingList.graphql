@@ -1,0 +1,7 @@
+mutation JoinWaitingList($activityId: ID!) {
+  joinWaitingList(input: { activityId: $activityId }) {
+    waitingListEntry {
+      id
+    }
+  }
+}

@@ -59,6 +59,10 @@ export default function Activity({ loaderData }: Route.ComponentProps) {
             <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2.5 py-1 text-xs font-semibold text-success ring-1 ring-success/20">
               &#10003; You&rsquo;re registered
             </span>
+          ) : activity.viewerIsOnWaitingList ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-clay-soft px-2.5 py-1 text-xs font-semibold text-clay-ink ring-1 ring-clay/20">
+              On the waiting list
+            </span>
           ) : null}
         </div>
 
@@ -102,6 +106,7 @@ export default function Activity({ loaderData }: Route.ComponentProps) {
               <RegistrationButton
                 activityId={activity.id}
                 isRegistered={activity.viewerIsRegistered}
+                viewerIsOnWaitingList={activity.viewerIsOnWaitingList}
                 full={activity.attendanceCount >= activity.maxAttendees}
               />
             </div>

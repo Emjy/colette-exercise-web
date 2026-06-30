@@ -1,42 +1,63 @@
 import { useFetcher } from "react-router";
 import { Button } from "./Button";
 
-type ActionResult = { ok: true; intent: "register" | "unregister" } | { error: string };
+type ActionResult =
+  | { ok: true; intent: "register" | "unregister" | "join-waiting-list" }
+  | { error: string };
 
 type RegistrationButtonProps = {
   activityId: string;
   isRegistered: boolean;
+  viewerIsOnWaitingList: boolean;
   full?: boolean;
 };
 
 /**
- * The register / deregister call-to-action. The label and the mutation it posts
- * both follow `isRegistered`; after the action runs, the route loader revalidates
- * and `isRegistered` flips — so the button and the card badge update on their own.
+ * The register / deregister / join-waiting-list call-to-action.
  *
- * A full activity blocks new registrations (with a hint), but a member who is
- * already in can always leave.
+ * Priority order:
+ * 1. Already registered → "Deregister" (secondary)
+ * 2. On waiting list + activity full → status text, no action
+ * 3. Activity full, not on waiting list → "Join waiting list" (primary)
+ * 4. Spots available → "Register" (primary)
+ *
+ * After any successful action the route loader revalidates, so all derived
+ * fields (viewerIsRegistered, viewerIsOnWaitingList, remainingSpots) refresh.
  */
 export function RegistrationButton({
   activityId,
   isRegistered,
+  viewerIsOnWaitingList,
   full = false,
 }: RegistrationButtonProps) {
   const fetcher = useFetcher<ActionResult>();
-  const intent = isRegistered ? "unregister" : "register";
   const submitting = fetcher.state !== "idle";
   const error = fetcher.data && "error" in fetcher.data ? fetcher.data.error : null;
 
-  const blockedByCapacity = full && !isRegistered;
-  const hintId = `registration-hint-${activityId}`;
+  // When on waiting list and the activity is still full, there is nothing to
+  // do — the member will be notified when a seat frees up.
+  if (viewerIsOnWaitingList && !isRegistered && full) {
+    return (
+      <p className="text-sm text-muted" role="status">
+        You&rsquo;re on the waiting list for this activity.
+      </p>
+    );
+  }
+
+  const canJoinWaitingList = full && !isRegistered && !viewerIsOnWaitingList;
+  const intent = isRegistered ? "unregister" : canJoinWaitingList ? "join-waiting-list" : "register";
 
   const label = submitting
     ? isRegistered
       ? "Deregistering…"
-      : "Registering…"
+      : canJoinWaitingList
+        ? "Joining waiting list…"
+        : "Registering…"
     : isRegistered
       ? "Deregister"
-      : "Register";
+      : canJoinWaitingList
+        ? "Join waiting list"
+        : "Register";
 
   return (
     <div>
@@ -45,18 +66,12 @@ export function RegistrationButton({
         <input type="hidden" name="intent" value={intent} />
         <Button
           variant={isRegistered ? "secondary" : "primary"}
-          disabled={submitting || blockedByCapacity}
+          disabled={submitting}
           aria-busy={submitting}
-          aria-describedby={blockedByCapacity ? hintId : undefined}
         >
           {label}
         </Button>
       </fetcher.Form>
-      {blockedByCapacity ? (
-        <p id={hintId} className="mt-2 text-sm text-muted">
-          This activity is full — there are no spots left to register.
-        </p>
-      ) : null}
       {error ? (
         <p className="mt-2 text-sm text-danger" role="alert">
           {error}

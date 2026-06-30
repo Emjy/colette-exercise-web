@@ -8,6 +8,7 @@ query Activity($slug: String!) {
     maxAttendees
     attendanceCount
     viewerIsRegistered
+    viewerIsOnWaitingList
     creator {
       id
       name
